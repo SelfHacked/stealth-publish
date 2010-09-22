@@ -2,11 +2,11 @@
 /**
  * @package Stealth_Publish
  * @author Scott Reilly
- * @version 2.0
+ * @version 2.0.1
  */
 /*
 Plugin Name: Stealth Publish
-Version: 2.0
+Version: 2.0.1
 Plugin URI: http://coffee2code.com/wp-plugins/stealth-publish/
 Author: Scott Reilly
 Author URI: http://coffee2code.com
@@ -153,14 +153,17 @@ class c2c_StealthPublish {
 	 * @since 1.0
 	 *
 	 * @param string $where The current WHERE condition string
-	 * @param WP_Query $wpquery The query object
+	 * @param WP_Query $wp_query The query object (not provided by WP prior to WP 3.0)
 	 * @return string The potentially amended WHERE condition string to exclude stealth published posts
 	 */
-	function stealth_publish_where( $where, $wpquery ) {
+	function stealth_publish_where( $where, $wp_query = null ) {
 		global $wpdb;
+		if ( !$wp_query )
+			global $wp_query;
+
 		// The third condition is for when a query_posts() (or similar) query from the front page is called that
 		// undermines is_home() (such as when querying for posts in a particular category)
-		if ( $wpquery->is_home || $wpquery->is_feed ||
+		if ( $wp_query->is_home || $wp_query->is_feed ||
 			( trailingslashit( get_option( 'siteurl' ) ) == trailingslashit( 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'] ) ) ) {
 			$stealth_published_posts = implode( ',', $this->find_stealth_published_post_ids() );
 			if ( !empty( $stealth_published_posts ) )
