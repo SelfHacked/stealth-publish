@@ -4,8 +4,8 @@ Donate link: http://coffee2code.com/donate
 Tags: post, archive, feed, feature, home, stealth, publish, coffee2code
 Requires at least: 2.9
 Tested up to: 3.0.1
-Stable tag: 2.0.1
-Version: 2.0.1
+Stable tag: 2.0.2
+Version: 2.0.2
 
 Prevent specified posts from being featured on the front page or in feeds, and from notifying external services of publication.
 
@@ -85,6 +85,9 @@ function override_stealth_publish_silent( $publish_silently, $post_id ) {
 
 == Changelog ==
 
+= 2.0.2 =
+* Bugfix for auto-save losing value of stealth publish status
+
 = 2.0.1 =
 * Bugfix for WP 2.9.2 compatibility
 
@@ -118,6 +121,9 @@ function override_stealth_publish_silent( $publish_silently, $post_id ) {
 
 
 == Upgrade Notice ==
+
+= 2.0.2 =
+Recommended bugfix release.  Fixes bug where auto-save can lose value of stealth publish status.
 
 = 2.0.1 =
 Bugfix for WP 2.9.2 compatibility.

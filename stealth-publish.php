@@ -2,11 +2,11 @@
 /**
  * @package Stealth_Publish
  * @author Scott Reilly
- * @version 2.0.1
+ * @version 2.0.2
  */
 /*
 Plugin Name: Stealth Publish
-Version: 2.0.1
+Version: 2.0.2
 Plugin URI: http://coffee2code.com/wp-plugins/stealth-publish/
 Author: Scott Reilly
 Author URI: http://coffee2code.com
@@ -122,8 +122,10 @@ class c2c_StealthPublish {
 	 * @return array The unmodified $data
 	 */
 	function save_stealth_publish_status( $data, $postarr ) {
-		$new_value = isset( $postarr[$this->field] ) ? $postarr[$this->field] : '';
-		update_post_meta( $postarr['ID'], $this->meta_key, $new_value );
+		if ( isset( $postarr['post_type'] ) && ( 'revision' != $postarr['post_type'] ) ) {
+			$new_value = isset( $postarr[$this->field] ) ? $postarr[$this->field] : '';
+			update_post_meta( $postarr['ID'], $this->meta_key, $new_value );
+		}
 		return $data;
 	}
 
