@@ -3,11 +3,12 @@ Contributors: coffee2code
 Donate link: http://coffee2code.com/donate
 Tags: post, archive, feed, feature, home, stealth, publish, coffee2code
 Requires at least: 2.9
-Tested up to: 3.0.1
-Stable tag: 2.0.2
-Version: 2.0.2
+Tested up to: 3.1
+Stable tag: 2.1
+Version: 2.1
 
 Prevent specified posts from being featured on the front page or in feeds, and from notifying external services of publication.
+
 
 == Description ==
 
@@ -20,6 +21,8 @@ A stealth published post will also not notify any external services about the pu
 NOTE: Use of other plugins making their own queries against the database to find posts will likely allow a post to appear on the front page.  But use of the standard WordPress functions for retrieving posts (as done for the main posts query) should not allow stealth published posts to appear on the home page.
 
 NOTE: If you use this plugin, you do not need to use my "Silent Publish" plugin as that functionality is incorporated into this plugin.  Alternatively, if you like the silent publishing feature but want your new posts to appear on your blog's front page and in feeds, then just use the "Silent Publish" plugin.
+
+Links: [Plugin Homepage]:(http://coffee2code.com/wp-plugins/stealth-publish/) | [Author Homepage]:(http://coffee2code.com)
 
 
 == Installation ==
@@ -85,6 +88,12 @@ function override_stealth_publish_silent( $publish_silently, $post_id ) {
 
 == Changelog ==
 
+= 2.1 =
+* Switch from object instantiation to direct class invocation
+* Explicitly declare all functions public static and class variables private static
+* Note compatibility through WP 3.1+
+* Update copyright date (2011)
+
 = 2.0.2 =
 * Bugfix for auto-save losing value of stealth publish status
 
@@ -121,6 +130,9 @@ function override_stealth_publish_silent( $publish_silently, $post_id ) {
 
 
 == Upgrade Notice ==
+
+= 2.1 =
+Minor update: implementation changes; noted compatibility with WP 3.1+ and updated copyright date.
 
 = 2.0.2 =
 Recommended bugfix release.  Fixes bug where auto-save can lose value of stealth publish status.
