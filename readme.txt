@@ -3,9 +3,9 @@ Contributors: coffee2code
 Donate link: http://coffee2code.com/donate
 Tags: post, archive, feed, feature, home, stealth, publish, coffee2code
 Requires at least: 2.9
-Tested up to: 3.1
-Stable tag: 2.1
-Version: 2.1
+Tested up to: 3.2
+Stable tag: 2.2
+Version: 2.2
 
 Prevent specified posts from being featured on the front page or in feeds, and from notifying external services of publication.
 
@@ -22,7 +22,7 @@ NOTE: Use of other plugins making their own queries against the database to find
 
 NOTE: If you use this plugin, you do not need to use my "Silent Publish" plugin as that functionality is incorporated into this plugin.  Alternatively, if you like the silent publishing feature but want your new posts to appear on your blog's front page and in feeds, then just use the "Silent Publish" plugin.
 
-Links: [Plugin Homepage]:(http://coffee2code.com/wp-plugins/stealth-publish/) | [Author Homepage]:(http://coffee2code.com)
+Links: [Plugin Homepage](http://coffee2code.com/wp-plugins/stealth-publish/) | [Author Homepage](http://coffee2code.com)
 
 
 == Installation ==
@@ -44,10 +44,14 @@ Links: [Plugin Homepage]:(http://coffee2code.com/wp-plugins/stealth-publish/) | 
 
 This is probably the kind of thing that you would recognize the need for or you don't.  It's beneficial in instances where you want to publish new content without any fanfare and just want the post added to archive and category pages and its own permalink page.
 
+= Can I have the checkbox checked by default? =
+
+Yes. See the Filters section (under Other Notes) and look for the example using the 'c2c_stealth_publish_default' filter. You'll have to put that code into your active theme's functions.php file.
+
 
 == Filters ==
 
-The plugin is further customizable via two filters. Typically, these customizations would be put into your active theme's functions.php file, or used by another plugin.
+The plugin is further customizable via three filters. Typically, these customizations would be put into your active theme's functions.php file, or used by another plugin.
 
 = stealth_publish_meta_key (filter) =
 
@@ -84,9 +88,31 @@ function override_stealth_publish_silent( $publish_silently, $post_id ) {
 	return false;
 }
 `
+= c2c_stealth_publish_default (filter) =
+
+The 'c2c_stealth_publish_default' filter allows you to override the default state of the 'Stealth Publish?' checkbox.
+
+Arguments:
+
+* $state (boolean): The default state of the checkbox. By default this is false.
+* $post (WP_Post): The post currently being created/edited.
+
+Example:
+
+`
+// Have the Stealth Publish? checkbox checked by default.
+add_filter( 'c2c_stealth_publish_default', '__return_true' );
+`
 
 
 == Changelog ==
+
+= 2.2 =
+* Fix bug where using Quick Edit on post caused Stealth Publish status to be cleared
+* Add filter 'c2c_stealth_publish_default' to allow configuring checkbox to be checked by default
+* Note compatibility through WP 3.2+
+* Minor code formatting changes (spacing)
+* Fix plugin homepage and author links in description in readme.txt
 
 = 2.1 =
 * Switch from object instantiation to direct class invocation
@@ -130,6 +156,9 @@ function override_stealth_publish_silent( $publish_silently, $post_id ) {
 
 
 == Upgrade Notice ==
+
+= 2.2 =
+Minor update: fixed bug with losing Stealth Publish status during Quick Edit; added new filter to allow making checkbox checked by default; noted compatibility through WP 3.2+
 
 = 2.1 =
 Minor update: implementation changes; noted compatibility with WP 3.1+ and updated copyright date.

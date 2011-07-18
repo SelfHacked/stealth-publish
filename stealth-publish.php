@@ -2,22 +2,27 @@
 /**
  * @package Stealth_Publish
  * @author Scott Reilly
- * @version 2.1
+ * @version 2.2
  */
 /*
 Plugin Name: Stealth Publish
-Version: 2.1
+Version: 2.2
 Plugin URI: http://coffee2code.com/wp-plugins/stealth-publish/
 Author: Scott Reilly
 Author URI: http://coffee2code.com
 Text Domain: stealth-publish
 Description: Prevent specified posts from being featured on the front page or in feeds, and from notifying external services of publication.
 
-Compatible with WordPress 2.9+, 3.0+, 3.1+
+Compatible with WordPress 2.9+, 3.0+, 3.1+, 3.2+
 
 =>> Read the accompanying readme.txt file for instructions and documentation.
 =>> Also, visit the plugin's homepage for additional information and updates.
 =>> Or visit: http://wordpress.org/extend/plugins/stealth-publish/
+
+TODO:
+	* Update screenshots for WP 3.2
+	* Ability to default to checked (as in always checked)
+	* Value lost if quick edit used
 
 */
 
@@ -37,15 +42,15 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRA
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-if ( !class_exists( 'c2c_StealthPublish' ) ) :
+if ( ! class_exists( 'c2c_StealthPublish' ) ) :
 
 class c2c_StealthPublish {
 
-	private static $field = 'stealth_publish';
-	private static $meta_key = '_stealth-publish'; // Filterable via 'stealth_publish_meta_key' filter
+	private static $field                   = 'stealth_publish';
+	private static $meta_key                = '_stealth-publish'; // Filterable via 'stealth_publish_meta_key' filter
 	private static $stealth_published_posts = array(); // For memoization
-	private static $textdomain = 'stealth-publish';
-	private static $textdomain_subdir = 'lang';
+	private static $textdomain              = 'stealth-publish';
+	private static $textdomain_subdir       = 'lang';
 
 	/**
 	 * Constructor
@@ -102,8 +107,13 @@ class c2c_StealthPublish {
 	 */
 	public static function add_ui() {
 		global $post;
-		$value = get_post_meta( $post->ID, self::$meta_key, true );
+
+		if ( apply_filters( 'c2c_stealth_publish_default', false, $post ) )
+			$value = '1';
+		else
+			$value = get_post_meta( $post->ID, self::$meta_key, true );
 		$checked = checked( $value, '1', false );
+
 		echo "<div class='misc-pub-section'><label class='selectit c2c-stealth-publish' for='" . self::$field . "' title='";
 		esc_attr_e( 'If checked, the post will not appear on the front page or in the main feed.', self::$textdomain );
 		echo "'>\n";
@@ -122,7 +132,8 @@ class c2c_StealthPublish {
 	 * @return array The unmodified $data
 	 */
 	public static function save_stealth_publish_status( $data, $postarr ) {
-		if ( isset( $postarr['post_type'] ) && ( 'revision' != $postarr['post_type'] ) ) {
+		if ( isset( $postarr['post_type'] ) && ( 'revision' != $postarr['post_type'] ) &&
+			! ( isset( $_POST['action'] ) && 'inline-save' == $_POST['action'] ) ) {
 			$new_value = isset( $postarr[self::$field] ) ? $postarr[self::$field] : '';
 			update_post_meta( $postarr['ID'], self::$meta_key, $new_value );
 		}
@@ -137,7 +148,7 @@ class c2c_StealthPublish {
 	 * @return array Post IDs of all stealth published posts
 	 */
 	public static function find_stealth_published_post_ids() {
-		if ( !empty( self::$stealth_published_posts ) )
+		if ( ! empty( self::$stealth_published_posts ) )
 			return self::$stealth_published_posts;
 
 		global $wpdb;
@@ -160,7 +171,7 @@ class c2c_StealthPublish {
 	 */
 	public static function stealth_publish_where( $where, $wp_query = null ) {
 		global $wpdb;
-		if ( !$wp_query )
+		if ( ! $wp_query )
 			global $wp_query;
 
 		// The third condition is for when a query_posts() (or similar) query from the front page is called that
@@ -168,7 +179,7 @@ class c2c_StealthPublish {
 		if ( $wp_query->is_home || $wp_query->is_feed ||
 			( trailingslashit( get_option( 'siteurl' ) ) == trailingslashit( 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'] ) ) ) {
 			$stealth_published_posts = implode( ',', self::find_stealth_published_post_ids() );
-			if ( !empty( $stealth_published_posts ) )
+			if ( ! empty( $stealth_published_posts ) )
 				$where .= " AND $wpdb->posts.ID NOT IN ($stealth_published_posts)";
 		}
 		return $where;
