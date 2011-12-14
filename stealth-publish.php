@@ -2,32 +2,27 @@
 /**
  * @package Stealth_Publish
  * @author Scott Reilly
- * @version 2.2
+ * @version 2.2.1
  */
 /*
 Plugin Name: Stealth Publish
-Version: 2.2
+Version: 2.2.1
 Plugin URI: http://coffee2code.com/wp-plugins/stealth-publish/
 Author: Scott Reilly
 Author URI: http://coffee2code.com
 Text Domain: stealth-publish
+Domain Path: /lang/
 Description: Prevent specified posts from being featured on the front page or in feeds, and from notifying external services of publication.
 
-Compatible with WordPress 2.9+, 3.0+, 3.1+, 3.2+
+Compatible with WordPress 2.9+, 3.0+, 3.1+, 3.2+, 3.3+
 
 =>> Read the accompanying readme.txt file for instructions and documentation.
 =>> Also, visit the plugin's homepage for additional information and updates.
 =>> Or visit: http://wordpress.org/extend/plugins/stealth-publish/
-
-TODO:
-	* Update screenshots for WP 3.2
-	* Ability to default to checked (as in always checked)
-	* Value lost if quick edit used
-
 */
 
 /*
-Copyright (c) 2007-2011 by Scott Reilly (aka coffee2code)
+Copyright (c) 2007-2012 by Scott Reilly (aka coffee2code)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation
 files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy,
@@ -53,7 +48,16 @@ class c2c_StealthPublish {
 	private static $textdomain_subdir       = 'lang';
 
 	/**
-	 * Constructor
+	 * Returns version of the plugin.
+	 *
+	 * @since 2.2.1
+	 */
+	public static function version() {
+		return '2.2.1';
+	}
+
+	/**
+	 * Initializer
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'do_init' ) );
@@ -94,7 +98,7 @@ class c2c_StealthPublish {
 	 * @return void
 	 */
 	public static function load_textdomain() {
-		$subdir = empty( self::$textdomain_subdir ) ? '' : ( '/' . self::$textdomain_subdir );
+		$subdir = empty( self::$textdomain_subdir ) ? '' : ( DIRECTORY_SEPARATOR . self::$textdomain_subdir );
 		load_plugin_textdomain( self::$textdomain, false, basename( dirname( __FILE__ ) ) . $subdir );
 	}
 

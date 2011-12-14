@@ -3,9 +3,9 @@ Contributors: coffee2code
 Donate link: http://coffee2code.com/donate
 Tags: post, archive, feed, feature, home, stealth, publish, coffee2code
 Requires at least: 2.9
-Tested up to: 3.2.1
-Stable tag: 2.2
-Version: 2.2
+Tested up to: 3.3
+Stable tag: 2.2.1
+Version: 2.2.1
 
 Prevent specified posts from being featured on the front page or in feeds, and from notifying external services of publication.
 
@@ -22,7 +22,7 @@ NOTE: Use of other plugins making their own queries against the database to find
 
 NOTE: If you use this plugin, you do not need to use my "Silent Publish" plugin as that functionality is incorporated into this plugin.  Alternatively, if you like the silent publishing feature but want your new posts to appear on your blog's front page and in feeds, then just use the "Silent Publish" plugin.
 
-Links: [Plugin Homepage](http://coffee2code.com/wp-plugins/stealth-publish/) | [Author Homepage](http://coffee2code.com)
+Links: [Plugin Homepage](http://coffee2code.com/wp-plugins/stealth-publish/) | [Plugin Directory Page](http://wordpress.org/extend/plugins/stealth-publish/) | [Author Homepage](http://coffee2code.com)
 
 
 == Installation ==
@@ -107,6 +107,18 @@ add_filter( 'c2c_stealth_publish_default', '__return_true' );
 
 == Changelog ==
 
+= 2.2.1 =
+* Add version() to return plugin's version
+* Update readme with example and documentation for new filter
+* Note compatibility through WP 3.3+
+* Update screenshots for WP 3.3
+* Use DIRECTORY_SEPARATOR instead of hardcoded '/'
+* Create 'lang' subdirectory and move .pot file into it
+* Regenerate .pot
+* Add 'Domain Path' directive to top of main plugin file
+* Add link to plugin directory page to readme.txt
+* Update copyright date (2012)
+
 = 2.2 =
 * Fix bug where using Quick Edit on post caused Stealth Publish status to be cleared
 * Add filter 'c2c_stealth_publish_default' to allow configuring checkbox to be checked by default
@@ -156,6 +168,9 @@ add_filter( 'c2c_stealth_publish_default', '__return_true' );
 
 
 == Upgrade Notice ==
+
+= 2.2.1 =
+Minor update: moved .pot file into 'lang' subdirectory; noted compatibility through WP 3.3+.
 
 = 2.2 =
 Minor update: fixed bug with losing Stealth Publish status during Quick Edit; added new filter to allow making checkbox checked by default; noted compatibility through WP 3.2+
