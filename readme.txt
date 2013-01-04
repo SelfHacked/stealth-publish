@@ -2,10 +2,12 @@
 Contributors: coffee2code
 Donate link: http://coffee2code.com/donate
 Tags: post, archive, feed, feature, home, stealth, publish, coffee2code
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 2.9
-Tested up to: 3.3
-Stable tag: 2.2.1
-Version: 2.2.1
+Tested up to: 3.5
+Stable tag: 2.3
+Version: 2.3
 
 Prevent specified posts from being featured on the front page or in feeds, and from notifying external services of publication.
 
@@ -14,19 +16,20 @@ Prevent specified posts from being featured on the front page or in feeds, and f
 
 Prevent specified posts from being featured on the front page or in feeds, and from notifying external services of publication.  Beneficial in instances where you want to publish new content without any fanfare and just want the post added to archive and category pages and its own permalink page.
 
-Posts that are assigned a custom field of "stealth-publish" with a value of "1" will no longer be featured on the front page of the blog, nor will the post be included in any feeds.
+Posts which are saved with the checkbox "Stealth publish?" checked will no longer be featured on the front page of the blog, nor will the post be included in any feeds.
 
-A stealth published post will also not notify any external services about the publication.  This includes not sending out pingbacks, trackbacks, and pings to update services such as pingomatic.com.  This behavior can be overridden via the 'stealth_publish_silent' filter (see Filters section).
+A stealth published post will also not notify any external services about the publication.  This includes not sending out pingbacks, trackbacks, and pings to update services such as pingomatic.com.  This behavior can be overridden via the 'c2c_stealth_publish_silent' filter (see Filters section).
 
-NOTE: Use of other plugins making their own queries against the database to find posts will likely allow a post to appear on the front page.  But use of the standard WordPress functions for retrieving posts (as done for the main posts query) should not allow stealth published posts to appear on the home page.
+NOTE: Use of other plugins making their own queries against the database to find posts will likely allow a post to appear on the front page.  But use of the standard WordPress functions for retrieving posts (as done for the main posts query and the recent posts widget) should not allow stealth published posts to appear on the home page.
 
-NOTE: If you use this plugin, you do not need to use my "Silent Publish" plugin as that functionality is incorporated into this plugin.  Alternatively, if you like the silent publishing feature but want your new posts to appear on your blog's front page and in feeds, then just use the "Silent Publish" plugin.
+NOTE: If you use this plugin, you do not need to use my [Silent Publish](http://wordpress.org/extend/plugins/silent-publish/) plugin as that functionality is incorporated into this plugin.  Alternatively, if you like the silent publishing feature but want your new posts to appear on your blog's front page and in feeds, then just use the "Silent Publish" plugin.
 
 Links: [Plugin Homepage](http://coffee2code.com/wp-plugins/stealth-publish/) | [Plugin Directory Page](http://wordpress.org/extend/plugins/stealth-publish/) | [Author Homepage](http://coffee2code.com)
 
 
 == Installation ==
 
+1. Whether installing or updating, whether this plugin or any other, it is always advisable to back-up your data before starting
 1. Unzip `stealth-publish.zip` inside the `/wp-content/plugins/` directory (or install via the built-in WordPress plugin installer)
 1. Activate the plugin through the 'Plugins' admin menu in WordPress
 1. For posts that you do not want to be featured on the front page and feeds, check the "Stealth publish?" checkbox when creating/editing a post
@@ -48,14 +51,22 @@ This is probably the kind of thing that you would recognize the need for or you 
 
 Yes. See the Filters section (under Other Notes) and look for the example using the 'c2c_stealth_publish_default' filter. You'll have to put that code into your active theme's functions.php file.
 
+= Why is the checkbox still present when editing a post that has already been published? =
+
+The checkbox is always present since it continues to have an effect on published posts, such as preventing the post from appearing on the front page or in feeds. You may, after publication, decide to not have the post be stealthy.  In such a case, you can do so directly by editing the post without needing to change it back to draft and then republishing it.
+
+= How does the plugin know which posts are stealth published? =
+
+(This is a developer-level question that doesn't affect general users.) The plugin assigns a custom field of "stealth-publish" with a value of "1".
+
 
 == Filters ==
 
 The plugin is further customizable via three filters. Typically, these customizations would be put into your active theme's functions.php file, or used by another plugin.
 
-= stealth_publish_meta_key (filter) =
+= c2c_stealth_publish_meta_key (filter) =
 
-The 'stealth_publish_meta_key' filter allows you to override the name of the custom field key used by the plugin to store a post's stealth publish status.  This isn't a common need.
+The 'c2c_stealth_publish_meta_key' filter allows you to override the name of the custom field key used by the plugin to store a post's stealth publish status.  This isn't a common need.
 
 Arguments:
 
@@ -64,15 +75,15 @@ Arguments:
 Example:
 
 `
-add_filter( 'stealth_publish_meta_key', 'override_stealth_publish_key' );
+add_filter( 'c2c_stealth_publish_meta_key', 'override_stealth_publish_key' );
 function override_stealth_publish_key( $custom_field_key ) {
 	return '_my_custom_stealth-publish';
 }
 `
 
-= stealth_publish_silent (filter) =
+= c2c_stealth_publish_silent (filter) =
 
-The 'stealth_publish_silent' filter allows you to override whether the plugin also ensure the post gets published silently (i.e. without sending out pingbacks, tracbacks, and pings to update services).
+The 'c2c_stealth_publish_silent' filter allows you to override whether the plugin also ensure the post gets published silently (i.e. without sending out pingbacks, tracbacks, and pings to update services).
 
 Arguments:
 
@@ -83,7 +94,7 @@ Example:
 
 `
 // Disable silent publishing for stealth published posts
-add_filter( 'stealth_publish_silent', 'override_stealth_publish_silent' );
+add_filter( 'c2c_stealth_publish_silent', 'override_stealth_publish_silent' );
 function override_stealth_publish_silent( $publish_silently, $post_id ) {
 	return false;
 }
@@ -106,6 +117,24 @@ add_filter( 'c2c_stealth_publish_default', '__return_true' );
 
 
 == Changelog ==
+
+= 2.3 =
+* Deprecate 'stealth_publish_meta_key' filter in favor of 'c2c_stealth_publish_meta_key' (but keep it temporarily for backwards compatibility)
+* Deprecate 'stealth_publish_silent' filter in favor of 'c2c_stealth_publish_silent' (but keep it temporarily for backwards compatibility)
+* Don't allow a blank string from 'c2c_stealth_publish_meta_key' to override the default meta key name
+* Remove private static $textdomain and its use; include textdomain name as string in translation calls
+* Remove function `load_textdomain()`
+* Add check to prevent execution of code if file is directly accessed
+* Re-license as GPLv2 or later (from X11)
+* Add 'License' and 'License URI' header tags to readme.txt and plugin file
+* Minor improvements to inline and readme documentation
+* Regenerate .pot
+* Minor code reformatting
+* Remove ending PHP close tag
+* Note compatibility through WP 3.5+
+* Tweak installation instructions in readme.txt
+* Update copyright date (2013)
+* Move screenshots into repo's assets directory
 
 = 2.2.1 =
 * Add version() to return plugin's version
@@ -168,6 +197,9 @@ add_filter( 'c2c_stealth_publish_default', '__return_true' );
 
 
 == Upgrade Notice ==
+
+= 2.3 =
+Recommended update: renamed and deprecated two filters; noted compatibility through WP 3.5+; and more.
 
 = 2.2.1 =
 Minor update: moved .pot file into 'lang' subdirectory; noted compatibility through WP 3.3+.
