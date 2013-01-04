@@ -57,7 +57,7 @@ The checkbox is always present since it continues to have an effect on published
 
 = How does the plugin know which posts are stealth published? =
 
-(This is a developer-level question that doesn't affect general users.) The plugin assigns a custom field of "stealth-publish" with a value of "1".
+(This is a developer-level question that doesn't affect general users.) The plugin assigns a custom field of "_stealth-publish" with a value of "1". Unless, of course, the name of the custom field was changed via use of the 'c2c_stealth_publish_meta_key' filter.
 
 
 == Filters ==
