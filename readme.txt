@@ -6,7 +6,7 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.6
 Tested up to: 4.1
-Stable tag: 2.5
+Stable tag: 2.5.1
 
 Prevent specified posts from being featured on the front page or in feeds, and from notifying external services of publication.
 
@@ -125,6 +125,10 @@ add_filter( 'c2c_stealth_publish_default', '__return_true' );
 
 == Changelog ==
 
+= 2.5.1 (2015-02-21) =
+* Revert to using `dirname(__FILE__)`; __DIR__ is only supported in PHP 5.3+
+* Ensure only '1' or '' is saved as meta field value
+
 = 2.5 (2015-02-17) =
 * Revert to pre-2.4 approach, which didn't have conflicts with other plugins and edge cases. Should fix most reported issues.
 * Cache stealth published post IDs in a transient; delete transient on post updates
@@ -240,6 +244,9 @@ add_filter( 'c2c_stealth_publish_default', '__return_true' );
 
 
 == Upgrade Notice ==
+
+= 2.5.1 =
+Bugfix release (for sites using the ancient PHP 5.2): revert use of __DIR__ constant since it wasn't introduced until PHP 5.3
 
 = 2.5 =
 Recommended update: reverts to pre-2.4 approach which should fix most reported issues; noted compatibility through WP 4.1+

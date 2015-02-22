@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Stealth Publish
- * Version:     2.5
+ * Version:     2.5.1
  * Plugin URI:  http://coffee2code.com/wp-plugins/stealth-publish/
  * Author:      Scott Reilly
  * Author URI:  http://coffee2code.com
@@ -14,11 +14,13 @@
  * Compatible with WordPress 3.6+ through 4.1+
  *
  * TODO:
- *  * Split functionality into separate checkboxes:
- *  * Hide from front page
- *  * Hide from feeds
- *  * Don't prevent a stealth post from being stealthy if it is explicitly
+ * - Split functionality into separate checkboxes:
+ * - Hide from front page
+ * - Hide from feeds
+ * - Don't prevent a stealth post from being stealthy if it is explicitly
  *    requested (by ID) in the query
+ * - Add functions stealthify_post( $post_id ), unstealthify_post( $post_id, $delete = false ),
+ *   is_stealth_post( $post_id )
  *
  * =>> Read the accompanying readme.txt file for instructions and documentation.
  * =>> Also, visit the plugin's homepage for additional information and updates.
@@ -26,7 +28,7 @@
  *
  * @package Stealth_Publish
  * @author  Scott Reilly
- * @version 2.5
+ * @version 2.5.1
 */
 
 /*
@@ -63,7 +65,7 @@ class c2c_StealthPublish {
 	 * @since 2.2.1
 	 */
 	public static function version() {
-		return '2.5';
+		return '2.5.1';
 	}
 
 	/**
@@ -91,7 +93,7 @@ class c2c_StealthPublish {
 	public static function do_init() {
 
 		// Load textdomain.
-		load_plugin_textdomain( 'stealth-publish', false, basename( __DIR__ ) . DIRECTORY_SEPARATOR . 'lang' );
+		load_plugin_textdomain( 'stealth-publish', false, basename( dirname( __FILE__ ) ) . DIRECTORY_SEPARATOR . 'lang' );
 
 		// Deprecated as of 2.3.
 		$meta_key = apply_filters( 'stealth_publish_meta_key', self::$meta_key );
@@ -216,7 +218,7 @@ class c2c_StealthPublish {
 			 ( 'revision' != $postarr['post_type'] ) &&
 			 ! ( isset( $_POST['action'] ) && 'inline-save' == $_POST['action'] )
 			) {
-			$new_value = isset( $postarr[ self::$field ] ) ? $postarr[ self::$field ] : '';
+			$new_value = ( isset( $postarr[ self::$field ] ) && '1' == $postarr[ self::$field ] ) ? '1' : '';
 			// TODO?: Delete the post meta if not setting the value to 1
 			update_post_meta( $postarr['ID'], self::$meta_key, $new_value );
 
