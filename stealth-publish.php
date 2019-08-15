@@ -293,6 +293,7 @@ class c2c_StealthPublish {
 	public static function save_stealth_publish_status( $data, $postarr ) {
 		if ( isset( $postarr['post_type'] ) &&
 			 ( 'revision' != $postarr['post_type'] ) &&
+			 ( isset( $postarr['action'] ) ) &&
 			 ! ( isset( $_POST['action'] ) && 'inline-save' == $_POST['action'] )
 			) {
 			// Update the value of the stealth update custom field.
