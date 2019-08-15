@@ -5,8 +5,8 @@ Tags: post, archive, feed, feature, home, stealth, publish, coffee2code
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.6
-Tested up to: 4.1
-Stable tag: 2.5.1
+Tested up to: 4.5
+Stable tag: 2.6
 
 Prevent specified posts from being featured on the front page or in feeds, and from notifying external services of publication.
 
@@ -42,6 +42,8 @@ Links: [Plugin Homepage](http://coffee2code.com/wp-plugins/stealth-publish/) | [
 
 1. A screenshot of the 'Publish' sidebar box on the Add New Post admin page. The 'Stealth publish?' checkbox is integrated alongside the existing fields.
 2. A screenshot of the 'Stealth publish?' checkbox displaying help text when hovering over the checkbox.
+3. A screenshot of the 'Stealth publish?' checkbox in the quick edit form.
+4. A screenshot of the icon adjacent to the post date for a post that has stealth publish enabled.
 
 
 == Frequently Asked Questions ==
@@ -82,10 +84,16 @@ Arguments:
 Example:
 
 `
-add_filter( 'c2c_stealth_publish_meta_key', 'override_stealth_publish_key' );
+/**
+ * Defines a custom meta key to be used by Stealth Publish.
+ *
+ * @param string $custom_field_key The default custom field key name.
+ * @return string
+ */
 function override_stealth_publish_key( $custom_field_key ) {
 	return '_my_custom_stealth-publish';
 }
+add_filter( 'c2c_stealth_publish_meta_key', 'override_stealth_publish_key' );
 `
 
 = c2c_stealth_publish_silent (filter) =
@@ -100,7 +108,13 @@ Arguments:
 Example:
 
 `
-// Disable silent publishing for stealth published posts
+/**
+ * Disable silent publishing for stealth published posts.
+ *
+ * @param bool $publish_silently True if the post is to be published silently.
+ * @param int  $post_id          The post ID.
+ * @return Always false.
+ */
 function override_stealth_publish_silent( $publish_silently, $post_id ) {
 	return false;
 }
@@ -124,6 +138,30 @@ add_filter( 'c2c_stealth_publish_default', '__return_true' );
 
 
 == Changelog ==
+
+= 2.6 (2016-03-27) =
+Highlights:
+* This release adds the ability to set the stealth publish checkbox via the quick edit box, adds an icon next to the post date in the admin listing to denote a post has stealth update enabled, adds support for language packs, and has some minor behind-the-scenes changes.
+
+Details:
+* New: Add ability to set the Stealth Publish? value in the Quick Edit form.
+    * Add `add_to_submitbox()`, `add_to_quick_edit()`, `admin_enqueue_scripts()`.
+    * Add option arg `$checked` to `add_ui()` and use its value as the default if not null.
+* New: Add hidden icon next to post's date column in posts table to indicate which posts have stealth publish enabled.
+* Change: Delete meta key on save if stealth publish is not enabled for post.
+* Change: Run `esc_attr()` on the field name before display for safety.
+* Change: Don't run `esc_attr()` on meta key name as it need not be so restrictive (and isn't for display).
+* Change: Add support for language packs:
+    * Set textdomain using a string instead of a variable.
+    * Don't load textdomain from file.
+    * Remove 'Domain Path' from plugin header.
+    * Remove .pot file and /lang subdirectory.
+* New: Add LICENSE file.
+* New: Add empty index.php to prevent files from being listed if web server has enabled directory listings.
+* Change: Add docblocks for class variables.
+* Change: Add docblock to example code.
+* Change: Note compatibility through WP 4.5+.
+* Change: Update copyright date (2016).
 
 = 2.5.1 (2015-02-21) =
 * Revert to using `dirname(__FILE__)`; __DIR__ is only supported in PHP 5.3+
@@ -244,6 +282,9 @@ add_filter( 'c2c_stealth_publish_default', '__return_true' );
 
 
 == Upgrade Notice ==
+
+= 2.6 =
+Feature release: added ability to configure 'Stealth publish?' via quick edit; added icon adjacent to post date in posts table; improved support for localization; verified compatibility through WP 4.5; updated copyright date (2016)
 
 = 2.5.1 =
 Bugfix release (for sites using the ancient PHP 5.2): revert use of __DIR__ constant since it wasn't introduced until PHP 5.3

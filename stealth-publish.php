@@ -1,17 +1,16 @@
 <?php
 /**
  * Plugin Name: Stealth Publish
- * Version:     2.5.1
+ * Version:     2.6
  * Plugin URI:  http://coffee2code.com/wp-plugins/stealth-publish/
  * Author:      Scott Reilly
  * Author URI:  http://coffee2code.com
  * Text Domain: stealth-publish
- * Domain Path: /lang/
  * License:     GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  * Description: Prevent specified posts from being featured on the front page or in feeds, and from notifying external services of publication.
  *
- * Compatible with WordPress 3.6+ through 4.1+
+ * Compatible with WordPress 3.6+ through 4.5+
  *
  * TODO:
  * - Split functionality into separate checkboxes:
@@ -28,11 +27,11 @@
  *
  * @package Stealth_Publish
  * @author  Scott Reilly
- * @version 2.5.1
+ * @version 2.6
 */
 
 /*
-	Copyright (c) 2007-2015 by Scott Reilly (aka coffee2code)
+	Copyright (c) 2007-2016 by Scott Reilly (aka coffee2code)
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -55,8 +54,30 @@ if ( ! class_exists( 'c2c_StealthPublish' ) ) :
 
 class c2c_StealthPublish {
 
+	/**
+	 * The name of the associated form field.
+	 *
+	 * @access private
+	 * @var string
+	 */
 	private static $field          = 'stealth_publish';
-	private static $meta_key       = '_stealth-publish'; // Filterable via 'c2c_stealth_publish_meta_key' filter
+
+	/**
+	 * The name of the post meta key.
+	 *
+	 * Note: Filterable via 'c2c_stealth_publish_meta_key' filter.
+	 *
+	 * @access private
+	 * @var string
+	 */
+	private static $meta_key       = '_stealth-publish';
+
+	/**
+	 * The name of the transient.
+	 *
+	 * @access private
+	 * @var string
+	 */
 	private static $transient_name = 'c2c_stealh_publish_stealth_ids';
 
 	/**
@@ -65,7 +86,7 @@ class c2c_StealthPublish {
 	 * @since 2.2.1
 	 */
 	public static function version() {
-		return '2.5.1';
+		return '2.6';
 	}
 
 	/**
@@ -76,7 +97,7 @@ class c2c_StealthPublish {
 	}
 
 	/**
-	 * Reset any cached values.
+	 * Resets any cached values.
 	 *
 	 * @since 2.4
 	 */
@@ -85,45 +106,83 @@ class c2c_StealthPublish {
 	}
 
 	/**
-	 * Register actions/filters and allow for configuration.
+	 * Registers actions/filters and allow for configuration.
 	 *
 	 * @since 2.0
-	 * @uses apply_filters() Calls 'c2c_stealth_publish_meta_key' with default meta key name
+	 * @uses apply_filters() Calls 'c2c_stealth_publish_meta_key' with default meta key name.
 	 */
 	public static function do_init() {
 
 		// Load textdomain.
-		load_plugin_textdomain( 'stealth-publish', false, basename( dirname( __FILE__ ) ) . DIRECTORY_SEPARATOR . 'lang' );
+		load_plugin_textdomain( 'stealth-publish' );
 
 		// Deprecated as of 2.3.
 		$meta_key = apply_filters( 'stealth_publish_meta_key', self::$meta_key );
 
 		// Apply custom filter to obtain meta key name.
-		$meta_key = esc_attr( apply_filters( 'c2c_stealth_publish_meta_key', $meta_key ) );
+		$meta_key = apply_filters( 'c2c_stealth_publish_meta_key', $meta_key );
 
 		// Only override the meta key name if one was specified. Otherwise the
 		// default remains (since a meta key is necessary).
-		if ( ! empty( $meta_key ) ) {
+		if ( $meta_key ) {
 			self::$meta_key = $meta_key;
 		}
 
-		// Register hooks
+		// Register hooks.
 		add_filter( 'posts_where',                 array( __CLASS__, 'stealth_publish_where' ), 1, 2 );
 		//add_action( 'pre_get_posts',               array( __CLASS__, 'exclude_stealth_posts' ), 1000 );
 		add_action( 'post_submitbox_misc_actions', array( __CLASS__, 'add_ui' ) );
 		add_filter( 'wp_insert_post_data',         array( __CLASS__, 'save_stealth_publish_status' ), 2, 2 );
 		add_action( 'publish_post',                array( __CLASS__, 'publish_post' ), 1, 1 );
 
+		add_action( 'quick_edit_custom_box',       array( __CLASS__, 'add_to_quick_edit' ), 10, 2 );
+		add_action( 'admin_enqueue_scripts',       array( __CLASS__, 'admin_enqueue_scripts' ) );
+		add_filter( 'post_date_column_time',       array( __CLASS__, 'add_icon_to_post_date_column' ), 10, 4 );
+
 	}
 
 	/**
-	 * Should stealth posts be exclude in current context?
+	 * Outputs a dashicon lock if the post is configured to be stealth updated.
+	 *
+	 * @since 2.6
+	 *
+	 * @param string  $t_time      The published time.
+	 * @param WP_Post $post        Post object.
+	 * @param string  $column_name The column name.
+	 * @param string  $mode        The list display mode ('excerpt' or 'list').
+	 */
+	public static function add_icon_to_post_date_column( $h_time, $post, $column_name, $mode ) {
+		echo $h_time;
+
+		if ( get_post_meta( $post->ID, self::$meta_key, true ) ) {
+			echo ' <span class="' . esc_attr( self::$field ) . ' dashicons dashicons-hidden" title="' . esc_attr__( 'Post has stealth publish enabled.', 'stealth-publish' ) . '"></span>';
+		}
+	}
+
+	/**
+	 * Enqueues the admin JS.
+	 *
+	 * @since 2.6
+	 *
+	 * @param string $hook_name The hook (aka page) name.
+	 */
+	public static function admin_enqueue_scripts( $hook_name ) {
+		if ( 'edit.php' !== $hook_name ) {
+			return;
+		}
+
+		wp_enqueue_script( self::$field, plugins_url( 'assets/admin.js', __FILE__ ), array( 'jquery' ), self::version(), true );
+	}
+
+	/**
+	 * Should stealth posts be excluded in current context?
 	 *
 	 * Checks if the query is being performed on the home page or a feed.
 	 *
 	 * @since 2.4
 	 *
 	 * @param  WP_Query $wp_query Query object.
+	 *
 	 * @return bool     If true, then stealth posts should be excluded.
 	 */
 	private static function should_exclude_stealth_posts( $wp_query ) {
@@ -133,7 +192,8 @@ class c2c_StealthPublish {
 		return (
 			$wp_query->is_home ||
 			$wp_query->is_feed ||
-			$wp_query->is_front_page() ||
+            // Since $wp_query is not queried at this stage, we can't use is_front_page()
+            (int) $wp_query->get('p') === (int) get_option( 'page_on_front' ) ||
 			( trailingslashit( $siteurl ) == trailingslashit( $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'] ) )
 		);
 	}
@@ -147,7 +207,7 @@ class c2c_StealthPublish {
 	 * values for the query.
 	 *
 	 * @since 2.4
-	 * @since 2.5 No longer actively used.
+	 * @deprecated 2.5 No longer actively used due to occasional interference with custom queries.
 	 *
 	 * @param WP_Query Query object.
 	 */
@@ -183,7 +243,7 @@ class c2c_StealthPublish {
 	 * Draws the UI to prompt user if stealth publish should be enabled for the post.
 	 *
 	 * @since 2.0
-	 * @uses apply_filters() Calls 'c2c_stealth_publish_default' with stealth publish state default (false)
+	 * @uses apply_filters() Calls 'c2c_stealth_publish_default' with stealth publish state default (false).
 	 */
 	public static function add_ui() {
 		global $post;
@@ -196,33 +256,53 @@ class c2c_StealthPublish {
 
 		$checked = checked( $value, '1', false );
 
-		echo "<div class='misc-pub-section'><label class='selectit c2c-stealth-publish' for='" . self::$field . "' title='";
+		echo "<div class='misc-pub-section'><label class='selectit c2c-stealth-publish' for='" . esc_attr( self::$field ) . "' title='";
 		esc_attr_e( 'If checked, the post will not appear on the front page or in the main feed.', 'stealth-publish' );
 		echo "'>\n";
-		echo "<input id='" . self::$field . "' type='checkbox' $checked value='1' name='" . self::$field . "' />\n";
+		echo "<input id='" . esc_attr( self::$field ) . "' type='checkbox' $checked value='1' name='" . esc_attr( self::$field ) . "' />\n";
 		_e( 'Stealth publish?', 'stealth-publish' );
 		echo '</label></div>' . "\n";
 	}
 
 	/**
-	 * Update the value of the stealth publish custom field.
+	 * Adds the checkbox to the quick edit panel.
+	 *
+	 * @since 2.6
+	 *
+	 * @param string $column_name Name of the column being output to quick edit.
+	 * @param string $post_type   The post type of the post.
+	 */
+	public static function add_to_quick_edit( $column_name, $post_type ) {
+		if ( did_action( 'quick_edit_custom_box' ) > 1 ) {
+			return;
+		}
+
+		self::add_ui();
+	}
+
+	/**
+	 * Updates the value of the stealth publish custom field.
 	 *
 	 * @since 2.0
 	 *
-	 * @param array  $data    Data
-	 * @param array  $postarr Array of post fields and values for post being saved
-	 * @return array The unmodified $data
+	 * @param array  $data    Data.
+	 * @param array  $postarr Array of post fields and values for post being saved.
+	 *
+	 * @return array The unmodified $data.
 	 */
 	public static function save_stealth_publish_status( $data, $postarr ) {
 		if ( isset( $postarr['post_type'] ) &&
 			 ( 'revision' != $postarr['post_type'] ) &&
 			 ! ( isset( $_POST['action'] ) && 'inline-save' == $_POST['action'] )
 			) {
-			$new_value = ( isset( $postarr[ self::$field ] ) && '1' == $postarr[ self::$field ] ) ? '1' : '';
-			// TODO?: Delete the post meta if not setting the value to 1
-			update_post_meta( $postarr['ID'], self::$meta_key, $new_value );
+			// Update the value of the stealth update custom field.
+			if ( isset( $postarr[ self::$field ] ) && $postarr[ self::$field ] ) {
+				update_post_meta( $postarr['ID'], self::$meta_key, '1' );
+			} else {
+				delete_post_meta( $postarr['ID'], self::$meta_key );
+			}
 
-			// Reset cached values
+			// Reset cached values.
 			self::reset();
 		}
 
@@ -230,20 +310,22 @@ class c2c_StealthPublish {
 	}
 
 	/**
-	 * Returns an array of post IDs that are to be stealth published
+	 * Returns and caches an array of post IDs that are to be stealth published.
 	 *
 	 * @since 1.0
 	 *
-	 * @return array Post IDs of all stealth published posts
+	 * @return array Post IDs of all stealth published posts.
 	 */
 	public static function find_stealth_published_post_ids() {
 		if ( false === ( $stealth_published_posts = get_transient( self::$transient_name ) ) ) {
 			global $wpdb;
+
 			$sql = "SELECT DISTINCT ID FROM $wpdb->posts AS p
 					LEFT JOIN $wpdb->postmeta AS pm ON (p.ID = pm.post_id)
 					WHERE pm.meta_key = %s AND pm.meta_value = '1'
 					GROUP BY pm.post_id";
 			$stealth_published_posts = $wpdb->get_col( $wpdb->prepare( $sql, self::$meta_key ) );
+
 			set_transient( self::$transient_name, $stealth_published_posts, 12 * HOUR_IN_SECONDS );
 		}
 
@@ -255,21 +337,21 @@ class c2c_StealthPublish {
 	 *
 	 * @since 1.0
 	 *
-	 * @param string   $where    The current WHERE condition string
-	 * @param WP_Query $wp_query The query object (not provided by WP prior to WP 3.0)
-	 * @return string  The potentially amended WHERE condition string to exclude stealth published posts
+	 * @param string   $where    The current WHERE condition string.
+	 * @param WP_Query $wp_query The query object (not provided by WP prior to WP 3.0).
+	 *
+	 * @return string  The potentially amended WHERE condition string to exclude stealth published posts.
 	 */
 	public static function stealth_publish_where( $where, $wp_query = null ) {
 		global $wpdb;
+
 		if ( ! $wp_query ) {
 			global $wp_query;
 		}
 
-		// The third condition is for when a query_posts() (or similar) query from the front page is called that
-		// undermines is_home() (such as when querying for posts in a particular category)
 		if ( self::should_exclude_stealth_posts( $wp_query ) ) {
 			$stealth_published_posts = implode( ',', self::find_stealth_published_post_ids() );
-			if ( ! empty( $stealth_published_posts ) ) {
+			if ( $stealth_published_posts ) {
 				$where .= " AND {$wpdb->posts}.ID NOT IN ( {$stealth_published_posts} )";
 			}
 		}
@@ -280,15 +362,15 @@ class c2c_StealthPublish {
 	 * Handles silent publishing if the associated checkbox is checked.
 	 *
 	 * @since 2.0
-	 * @uses apply_filters() Calls 'c2c_stealth_publish_silent' with stealth publish silent state default (true)
+	 * @uses apply_filters() Calls 'c2c_stealth_publish_silent' with stealth publish silent state default (true).
 	 *
-	 * @param int $post_id Post ID
+	 * @param int $post_id Post ID.
 	 */
 	public static function publish_post( $post_id ) {
 		// Deprecated as of 2.3.
 		$stealth_publish_silent = (bool) apply_filters( 'stealth_publish_silent', true, $post_id );
 
-		// Trick WP into being silent by invoking its import mode
+		// Trick WP into being silent by invoking its import mode.
 		if ( isset( $_POST[ self::$field ] ) && $_POST[ self::$field ] && (bool) apply_filters( 'c2c_stealth_publish_silent', $stealth_publish_silent, $post_id ) ) {
 			define( 'WP_IMPORTING', true );
 		}

@@ -1,10 +1,12 @@
 <?php
 
+defined( 'ABSPATH' ) or die();
+
 class Stealth_Publish_Test extends WP_UnitTestCase {
 
 	protected static $transient_name = 'c2c_stealh_publish_stealth_ids';
 
-	function tearDown() {
+	public function tearDown() {
 		parent::tearDown();
 		c2c_StealthPublish::reset();
 		// Ensure the filters get removed
@@ -14,11 +16,11 @@ class Stealth_Publish_Test extends WP_UnitTestCase {
 	}
 
 
-
-	/*
-	 * HELPER FUNCTIONS
-	 */
-
+	//
+	//
+	// HELPER FUNCTIONS
+	//
+	//
 
 
 	private function stealthify( $post_id ) {
@@ -26,10 +28,12 @@ class Stealth_Publish_Test extends WP_UnitTestCase {
 	}
 
 
+	//
+	//
+	// FUNCTIONS FOR HOOKING ACTIONS/FILTERS
+	//
+	//
 
-	/*
-	 * FUNCTIONS FOR HOOKING ACTIONS/FILTERS
-	 */
 
 	public function query_for_posts( $text ) {
 		$q = new WP_Query( array( 'post_type' => 'post' ) );
@@ -46,34 +50,34 @@ class Stealth_Publish_Test extends WP_UnitTestCase {
 	}
 
 
+	//
+	//
+	// TESTS
+	//
+	//
 
-	/*
-	 * TESTS
-	 */
 
-
-
-	function test_class_exists() {
+	public function test_class_exists() {
 		$this->assertTrue( class_exists( 'c2c_StealthPublish' ) );
 	}
 
-	function test_version() {
-		$this->assertEquals( '2.5.1', c2c_StealthPublish::version() );
+	public function test_version() {
+		$this->assertEquals( '2.6', c2c_StealthPublish::version() );
 	}
 
-	function test_init_action_triggers_do_init() {
+	public function test_init_action_triggers_do_init() {
 		$this->assertNotFalse( has_action( 'init', array( 'c2c_StealthPublish', 'do_init' ) ) );
 	}
 
-	function test_post_submitbox_misc_actions_action_triggers_add_ui() {
+	public function test_post_submitbox_misc_actions_action_triggers_add_ui() {
 		$this->assertNotFalse( has_action( 'post_submitbox_misc_actions', array( 'c2c_StealthPublish', 'add_ui' ) ) );
 	}
 
-	function test_wp_insert_post_data_filter_triggers_save_stealth_publish_status() {
+	public function test_wp_insert_post_data_filter_triggers_save_stealth_publish_status() {
 		$this->assertNotFalse( has_filter( 'wp_insert_post_data', array( 'c2c_StealthPublish', 'save_stealth_publish_status' ), 2, 2 ) );
 	}
 
-	function test_non_stealth_posts_not_affected_for_home() {
+	public function test_non_stealth_posts_not_affected_for_home() {
 		$post_ids = $this->factory->post->create_many( 5 );
 
 		$this->go_to( home_url() );
@@ -82,7 +86,7 @@ class Stealth_Publish_Test extends WP_UnitTestCase {
 		$this->assertEquals( 5, count( $GLOBALS['wp_query']->posts ) );
 	}
 
-	function test_stealth_post_not_listed_on_home() {
+	public function test_stealth_post_not_listed_on_home() {
 		$post_ids = $this->factory->post->create_many( 5 );
 
 		$this->stealthify( $post_ids[0] );
@@ -94,7 +98,7 @@ class Stealth_Publish_Test extends WP_UnitTestCase {
 		return $post_ids;
 	}
 
-	function test_stealth_post_not_listed_on_front_page() {
+	public function test_stealth_post_not_listed_on_front_page() {
 		// Create 5 posts, one of which is stealth published
 		$post_ids = $this->factory->post->create_many( 5 );
 		$this->stealthify( $post_ids[0] );
@@ -121,7 +125,7 @@ class Stealth_Publish_Test extends WP_UnitTestCase {
 		$this->assertEquals( 4, count( $GLOBALS['custom_query']->posts ) );
 	}
 
-	function test_disabled_stealth_post_shows_on_home() {
+	public function test_disabled_stealth_post_shows_on_home() {
 		$post_ids = $this->factory->post->create_many( 5 );
 
 		add_post_meta( $post_ids[0], '_stealth-publish', '0' );
@@ -131,7 +135,7 @@ class Stealth_Publish_Test extends WP_UnitTestCase {
 		$this->assertEquals( 5, count( $GLOBALS['wp_query']->posts ) );
 	}
 
-	function test_stealth_post_with_other_meta_query_not_listed_on_home() {
+	public function test_stealth_post_with_other_meta_query_not_listed_on_home() {
 		$post_ids = $this->factory->post->create_many( 5 );
 
 		$this->stealthify( $post_ids[0] );
@@ -144,7 +148,7 @@ class Stealth_Publish_Test extends WP_UnitTestCase {
 		$this->assertEquals( 1, count( $GLOBALS['wp_query']->posts ) );
 	}
 
-	function test_non_stealth_posts_not_affected_for_feed() {
+	public function test_non_stealth_posts_not_affected_for_feed() {
 		$post_ids = $this->factory->post->create_many( 5 );
 
 		$this->go_to( get_feed_link() );
@@ -153,7 +157,7 @@ class Stealth_Publish_Test extends WP_UnitTestCase {
 		$this->assertEquals( 5, count( $GLOBALS['wp_query']->posts ) );
 	}
 
-	function test_stealth_post_not_listed_on_feed() {
+	public function test_stealth_post_not_listed_on_feed() {
 		$post_ids = $this->factory->post->create_many( 5 );
 
 		$this->stealthify( $post_ids[0] );
@@ -163,7 +167,7 @@ class Stealth_Publish_Test extends WP_UnitTestCase {
 		$this->assertEquals( 4, count( $GLOBALS['wp_query']->posts ) );
 	}
 
-	function test_disabled_stealth_post_shows_on_feed() {
+	public function test_disabled_stealth_post_shows_on_feed() {
 		$post_ids = $this->factory->post->create_many( 5 );
 
 		add_post_meta( $post_ids[0], '_stealth-publish', '0' );
@@ -173,7 +177,7 @@ class Stealth_Publish_Test extends WP_UnitTestCase {
 		$this->assertEquals( 5, count( $GLOBALS['wp_query']->posts ) );
 	}
 
-	function test_non_stealth_post_publishes_without_silencing() {
+	public function test_non_stealth_post_publishes_without_silencing() {
 		$post_id = $this->factory->post->create( array( 'post_status' => 'draft' ) );
 
 		wp_publish_post( $post_id );
@@ -181,13 +185,13 @@ class Stealth_Publish_Test extends WP_UnitTestCase {
 		$this->assertFalse( defined( 'WP_IMPORTING' ) );
 	}
 
-	function test_stealth_post_ids_stored_in_transient() {
+	public function test_stealth_post_ids_stored_in_transient() {
 		$this->test_stealth_post_not_listed_on_home();
 
 		$this->assertNotEmpty( get_transient( self::$transient_name ) );
 	}
 
-	function test_transient_is_deleted_after_post_update() {
+	public function test_transient_is_deleted_after_post_update() {
 		$post_ids = $this->test_stealth_post_not_listed_on_home();
 
 		$post = get_post( $post_id[1] );
@@ -200,7 +204,7 @@ class Stealth_Publish_Test extends WP_UnitTestCase {
 
 	/* This test must be last since it results in  WP_IMPORTING constant being set. */
 
-	function test_stealth_post_publishes_silently() {
+	public function test_stealth_post_publishes_silently() {
 		$post_id = $this->factory->post->create( array( 'post_status' => 'draft' ) );
 		$this->stealthify( $post_id );
 
