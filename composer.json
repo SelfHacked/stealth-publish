@@ -1,0 +1,28 @@
+{
+  "name": "selfhacked/stealth-publish",
+  "description": "The SelfHacked version of stealth-publish",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0+",
+  "version": "2.6.1",
+  "authors": [
+    {
+      "name": "SelfHacked",
+      "email": "justin@selfhacked.com",
+      "homepage": "https://selfhacked.com",
+      "role": "Developer"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org"
+    },
+    {
+      "type": "composer",
+      "url": "https://packagist.org"
+    }
+  ],
+  "require": {
+    "php": ">=7.1"
+  }
+}

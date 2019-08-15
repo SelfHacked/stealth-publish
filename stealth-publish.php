@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Stealth Publish
- * Version:     2.6
+ * Version:     2.6.1
  * Plugin URI:  http://coffee2code.com/wp-plugins/stealth-publish/
  * Author:      Scott Reilly
  * Author URI:  http://coffee2code.com
